@@ -1,6 +1,6 @@
+const container = document.querySelector('.container');
 const listMyQuiz = [];
-
-searchQuiz();
+searchQuiz()
 
 function searchQuiz (){
     const promisse = axios.get('https://mock-api.bootcamp.respondeai.com.br/api/v2/buzzquizz/quizzes');
