@@ -13,13 +13,12 @@ function renderHomePage(response){
     const listQuiz = response.data;
     const containerListQuiz = container.querySelector('.list-quiz');
     renderMyQuiz();
-    for (let i = 0; i < listaQuiz.lenght; i++)
+    for (let i = 0; i < listQuiz.lenght; i++)
     { 
      containerListQuiz.innerHTML +=`
       <div class = "quiz" onClick="openQuiz(${listQuiz[i].id})">
       <img src="${listQuiz[i].image}" alt="">
-
-          <p>$"${listQuiz[i].title}" </p>
+          <p>"${listQuiz[i].title}"</p>
           </div> `
     }
 
@@ -35,7 +34,7 @@ function renderMyQuiz() {
     if(listQuiz.length === 0) {
         containerMyQuiz.innerHTML += 
             `<p>Você não criou nenhum quizz ainda :(</p>
-            <button>Criar Quizz</button>`
+            <button onclick="createdQuiz()">Criar Quizz</button>`
 ;
     } else {
         for (let index = 0; index < listQuiz.length; index++) {
