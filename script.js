@@ -1,126 +1,133 @@
 const container = document.querySelector('.container');
-const listMyQuiz = [];
-const listQuiz = [];
-searchQuiz()
+const listMyQuizzes = [];
 
-function searchQuiz (){
-    const promisse = axios.get('https://mock-api.driven.com.br/api/v4/buzzquizz/quizzes');
+
+buscarQuizzes()
+
+function buscarQuizzes() {
+    const promisse = axios.get('https://mock-api.bootcamp.respondeai.com.br/api/v4/buzzquizz/quizzes');
     promisse.then(renderHomePage);
     promisse.catch(errorRenderHomePage);
 }
 
-function renderHomePage(response){
-    const listQuiz = response.data;
-    const containerListQuiz = container.querySelector('.list-quiz');
-    console.log("Chegou aqui");
-    console.log(listQuiz);
+function renderHomePage(answer) {
+    const listQuiz = answer.data;
+
     renderMyQuiz();
-    for (let i = 0; i < listQuiz.lenght; i++)
-    { 
-     containerListQuiz.innerHTML +=`
-      <div class = "quiz" onClick="openQuiz(${listQuiz[i].id})">
-      <img src="${listQuiz[i].image}" alt="">
-          <p>"${listQuiz[i].title}"</p>
-          </div> `
-    }
 
-}
-function renderMyQuiz() {
-    container.innerHTML =`   
-        <div class="my-quiz"></div>        
-        <div class="title">
-            <strong>Todos os quizzes</strong>
-        </div>
-        <div class="list-quiz"></div>`;
-    const containerMyQuiz = document.querySelector('.my-quiz');
-    if(listQuiz.length === 0) {
-        containerMyQuiz.innerHTML += 
-            `<p>Você não criou nenhum quiz ainda :(</p>
-            <button onclick="createdQuiz()">Criar Quizz</button>`
-            console.log(containerMyQuiz);
-;
-    } else {
-        for (let index = 0; index < listQuiz.length; index++) {
-        containerMyQuiz.innerHTML = `
-        <div class="quiz" onclick="openQuiz(${listMyQuiz[index].id})">
-            <img src="${listMyQuiz[index].image}" alt="">
-            <div class="overlay"</div>
-            <p> <strong>${listMyQuiz[index].title}</strong> </p>
-        </div>
-        <button class="button"> + </button>`; 
-        }
+    const containerListQuiz = container.querySelector('.list-quizz');
+    for (let i = 0; i < listQuiz.length; i++) {
+        containerListQuiz.innerHTML += `
+            <div class="quizz" onclick="openQuiz(${listQuiz[i].id})">
+                <img src="${listQuiz[i].image}" alt="">
+                <div class="overlay"</div>
+                <p> <strong>${listQuiz[i].title}</strong> </p>
+            </div>`;
     }
 }
-
 function errorRenderHomePage (){
     alert("Failed to load server");
     console.log(error.response);
     /* num commit futuro eu vou testar se dar um setinterval e chamar novamente a searchquiz funciona */
 }
-function openQuiz(id) {
-    const requisition = axios.get(`https://mock-api.driven.com.br/api/v4/buzzquizz/quizzes/${id}`);
-
-    requisition.then(render);
+function renderMyQuiz() {
+    container.innerHTML =`   
+        <div class="my-quizz"></div>        
+        <div class="title">
+            <strong>Todos os quizzes</strong>
+        </div>
+        <div class="list-quizz"></div>`;
+    const containerMyQuiz = document.querySelector('.my-quizz');
+    if(listMyQuizzes.length === 0) {
+        containerMyQuiz.innerHTML += 
+            `<p>Você não criou nenhum quizz ainda :(</p>
+            <button onclick = "renderFirstSection()">Criar Quizz</button>`
+;
+    } else {
+        for (let index = 0; index < listMyQuizzes.length; index++) {
+        containerMyQuiz.innerHTML = `
+        <div class="quizz" onclick="openQuiz(${listMyQuizzes[index].id})">
+            <img src="${listMyQuizzes[index].image}" alt="">
+            <div class="overlay"</div>
+            <p> <strong>${listMyQuizzes[index].title}</strong> </p>
+        </div>
+        <button class="botao-adicionar" onclick = "renderFirstSection()">+</button>`; //criar essa classe no js
+        }
+    }
 }
 
 
-function render(response) {
+function openQuiz(id) {
+    const requisition = axios.get(`https://mock-api.bootcamp.respondeai.com.br/api/v4/buzzquizz/quizzes/${id}`);
 
-    const quizSelected = response.data;
+    requisition.then(renderQuiz);
+}
+
+
+function renderQuiz(answer) {
+
+    const quizSelected = answer.data;
 
     console.log(quizSelected);
-    let questions = "";
 
-    quizSelected.questions.forEach((question, indice) => (questions += renderQuestion(question, indice)));;
+      let questions1 = "";
+
+    quizSelected.questions.forEach((quest, indice) => (questions1 += renderQuestion(quest, indice)));;
 
     container.innerHTML = `
     <div class="banner">
       <img src="${quizSelected.image}">
       <div class="title">${quizSelected.title}</div>
     </div>
-    // <div class="question">
-        ${questions}
+    // <div class="questions1">
+        ${questions1}
     </div>
     <div class="level"></div>
     `
 }
-function renderQuestion(question, indice) {
 
-    let answers = "";
+function renderQuestion(quest, indice) {
 
-    question.answers.forEach( (response) => { answers += renderizarAnswers(response, indice) });
+    let answers1 = "";
+
+    quest.answers.forEach( (answer) => { answers1 += renderAnswers(answer, indice) });
     
     return (`
-    <div class="question question-${indice}">
-        <div class="title" style="background-color:${question.color}">
-        ${question.title}
+    <div class="quest quest-${indice}">
+        <div class="title" style="background-color:${quest.color}">
+        ${quest.title}
         </div>
-        <div class="answers">
-        ${answers}
+        <div class="answers1">
+        ${answers1}
         </div>
     </div>
     `)
 }
+
+function renderAnswers(answer, indice) {
+    
+}
+
 function createdQuiz() {
 
     renderFirstSection();
-    container.innerHTML = ``;
+    container.innerHTML = `
+    `;
 }
 
 
 function renderFirstSection() {
     
     container.innerHTML = `
-        <h2 class="title-section"> <strong> Comece pelo começo </strong> </h2>
+        <h2 class="title-secao"> <strong> Comece pelo começo </strong> </h2>
         
         <form>
-            <input class="title-quiz" placeholder="Título do seu quizz"></input>
-            <input class="image-quiz" placeholder="URL da imagem do seu quizz"></input>
-            <input class="qtd-questions" placeholder="Quantidade de perguntas do Quizz"></input>
-            <input class="qtd-levels" placeholder="Quantidade de níveis do Quizz"></input>
+            <input class="title-quizz" placeholder="Título do seu quizz"></input>
+            <input class="imagem-quizz" placeholder="URL da imagem do seu quizz"></input>
+            <input class="qtd-questions1" placeholder="Quantidade de perguntas do Quizz"></input>
+            <input class="qtd-level" placeholder="Quantidade de níveis do Quizz"></input>
         </form>
         
-        <button>Prosseguir para criar perguntas</button>
+        <button class="buttonCreation" onclick= "validation()">Prosseguir para criar perguntas</button>
         `;
 }
-
