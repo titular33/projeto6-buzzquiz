@@ -12,6 +12,8 @@ function searchQuiz (){
 function renderHomePage(response){
     const listQuiz = response.data;
     const containerListQuiz = container.querySelector('.list-quiz');
+    console.log("Chegou aqui");
+    console.log(listQuiz);
     renderMyQuiz();
     for (let i = 0; i < listQuiz.lenght; i++)
     { 
@@ -33,8 +35,9 @@ function renderMyQuiz() {
     const containerMyQuiz = document.querySelector('.my-quiz');
     if(listQuiz.length === 0) {
         containerMyQuiz.innerHTML += 
-            `<p>Você não criou nenhum quizz ainda :(</p>
+            `<p>Você não criou nenhum quiz ainda :(</p>
             <button onclick="createdQuiz()">Criar Quizz</button>`
+            console.log(containerMyQuiz);
 ;
     } else {
         for (let index = 0; index < listQuiz.length; index++) {

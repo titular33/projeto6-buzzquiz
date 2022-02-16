@@ -25,6 +25,14 @@ body {
     justify-content: center;
     align-items: center;
 }
+.container {
+    margin: 72px auto;
+    width: calc(3 * (340px + 15px));
+    display: flex;
+    flex-direction: column;
+    font-size: 20px;
+    align-items: center;
+}
 .quiz{
     margin: 0 auto;
     width:  340px;
@@ -62,7 +70,7 @@ body {
       }
 
  .my-quiz {
-        border: 1px #d4d4d4 dashed;
+        border: 1px #d4d4d4 ;
         margin: 73px auto 77px auto;
         width: calc(3 * (340px + 15px));
         height: 181px;
@@ -98,7 +106,7 @@ button {
     width: 136px;
     margin-top: 20px;
 }
- .questions {
+ .questions  {
     display: flex;
     width: 100%;
     max-width: 684px;
@@ -194,4 +202,12 @@ input:placeholder-shown {
   }
   .container h2 {
     margin-top: 70px;
+}
+form {
+    display: flex;
+    flex-direction: column;
+    width: 600px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 30px;
 }
