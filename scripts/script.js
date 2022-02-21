@@ -1,17 +1,9 @@
 
-/* fazer a conexão com o servidor */
-/* checar se existem quizzes seus, se voce não tem nenhum quizz então aplicamos o estado 0, do contrário o estado 1 */
-/* estado 0 é a tela onde não temos nenhum quizz nosso */
-/* estado 1 é a tela onde temos quizzes nossos */
-/* em ambos os estados nós podemos acionar as folhas de criação de quizzes */
-/* as folhas são nomeadas como first, second, third e fourthCreationSheet */
-/* todos os erros catch foram colocados no final do js */
-
-
 const URL_API = "https://mock-api.driven.com.br/api/v4/buzzquizz/quizzes"; /* group tip */
 let yourCreatedQuizzes_ids = []; /* stores user-created quiz ids */
 let allCreatedQuizzes_data = []; /* stores others users-created quiz data */
 let allQuizzes_HTML = "";
+let allCreatedQuizzes_ids = [];
 
 getQuizzes()
 
@@ -23,11 +15,14 @@ function getQuizzes() {
 
 /* checks which home page will be rendered */
 function renderHomePage (response){
+    let yourQuizzCheck = false;
     response.data.forEach(elementQuizz => {
         if(checkYourQuizzesAlreadyExists(elementQuizz.data)){
-            renderState1(response); /* state 1 is the visualization form ~with~ created quizzes */
-        } else {renderState0(response)} /* state 0 is the visualization form ~without~ created quizzes */
-    });
+            yourQuizzCheck = true; 
+        } else {yourQuizzCheck = false} 
+    }); 
+    if (yourQuizzCheck) {renderState1(response)} /* state 1 is the visualization form ~with~ created quizzes */
+    else {renderState0(response)} /* state 0 is the visualization form ~without~ created quizzes */
 }
 
 /* returns true if there are user quizzes, returns false otherwise */
@@ -52,26 +47,28 @@ function checkYourQuizzesAlreadyExists(data){
 
 /* state 0 = home page layout without user quizzes */
 function renderState0 (response){
-    var teste = response.data
-    console.log(teste)
+    let i = 0;
     response.data.forEach(elementQuizz => {
-        allQuizzes_HTML += `
-        <div class="quizz" onclick="selectQuizz() searchQuiz(${elementQuizz.id})" >
-            <img src="${elementQuizz.image}" alt="">
-            <h3>${elementQuizz.title}</h3>
-        </div>
-        `
+        if (!allCreatedQuizzes_ids.includes[elementQuizz.id]){
+            allQuizzes_HTML += `
+            <div class="quizz" onclick="selectQuizz(${elementQuizz.id}) searchQuiz(${elementQuizz.id})" >
+                <img src="${elementQuizz.image}" alt="">
+                <h3>${elementQuizz.title}</h3>
+            </div>
+            `
+            allCreatedQuizzes_ids[i] = elementQuizz.id;
+            i++
+        } else {}
     })
     const containerScreen0 = document.querySelector(".container-screen0");
     containerScreen0.innerHTML = `
     <section id="your-quizzes" class="wrapper">
-        <div id="state0" class="hidden">
+        <div id="state0">
             <h4>Você não criou nenhum quizz ainda :(</h4>
-            <button onclick="firstCreationSheet()">Criar Quizz</button>
+            <button type="button" onclick="firstCreationSheet()">Criar Quizz</button>
         </div>
     </section>
     `
-    /* .appendChild = is an alternative to .innerHTML += */
     containerScreen0.innerHTML += `
     <h1>Todos os Quizzes</h1>
     <section id="all-quizzes" class="wrapper">
@@ -83,18 +80,68 @@ function renderState0 (response){
     
 }
 
+
 function renderState1 (response){
     /* ... */
 }
 
+function selectQuizz(id){
+    const requisition = axios.get(`${URL_API}/${id}`);
+
+    requisition.then(renderQuiz);
+}
+
+function renderQuiz(answer) {
+
+    const quizSelected = answer.data;
+
+
+      let questions1 = "";
+
+    quizSelected.forEach((quest, indice) => (questions1 += renderQuestion(quest, indice)));
+
+    main.innerHTML = `
+    <div class="banner">
+      <img src="${quizSelected.image}">
+      <div class="title">${quizSelected.title}</div>
+    </div>
+    // <div class="questions1">
+        ${questions1}
+    </div>
+    <div class="level"></div>
+    `
+}
+
+function renderQuestion(quest, indice) {
+
+    let answers1 = "";
+
+    quest.answers.forEach( (answer) => { answers1 += renderAnswers(answer, indice) });
+    
+    return (`
+    <div class="quest quest-${indice}">
+        <div class="title" style="background-color:${quest.color}">
+        ${quest.title}
+        </div>
+        <div class="answers1">
+        ${answers1}
+        </div>
+    </div>
+    `)
+}
+function renderAnswers(answer, indice) {
+    
+}
 /* -----------------------------------------------creation sheets----------------------------------------------- */
 
 function firstCreationSheet (){
-    const containerScreen0 = document.getElementsByClassName('container-screen0');
-    const containerScreen1 = document.getElementsByClassName('container-screen1');
-    containerScreen0.classList.add('hidden');
+    const containerScreen0 = document.querySelector('.container-screen0');
+    const containerScreen1 = document.querySelector('.container-screen1');
+    let teste = "oi"
+    console.log(teste)
+    /containerScreen0.classList.add('hidden');
     /* containerScreen2.classList.remove('hidden'); ainda preciso ver se usarei isso */
-    containerScreen1.innerHTML = `
+    containerScreen1.innerHTML += `
     <h2 class="title-section"><strong>Comece pelo começo</strong></h2>
     <form>
         <input class="title-quizz" placeholder="Título do seu quizz"></input>
@@ -107,57 +154,56 @@ function firstCreationSheet (){
 }
 
 function validationFirstCreationSheet (){
-    const tittleQuizz = document.querySelector(".tittle-quizz"); /* deve ter no mínimo 20 e no máximo 65 caracteres */
+    const titleQuizz = document.querySelector(".title-quizz"); /* deve ter no mínimo 20 e no máximo 65 caracteres */
     const imageQuizz = document.querySelector(".image-quizz"); /* deve ter formato de URL */
     const qttQuestions = document.querySelector(".qtt-questions"); /* no mínimo 3 perguntas */
     const qttLevels = document.querySelector(".qtt-levels"); /* no mínimo 2 níveis */
-    if (tittleQuizz === '' || imageQuizz === '' || qttQuestions === '' || qttLevels === ''){
+    if (titleQuizz.value === '' || imageQuizz.value === '' || qttQuestions.value === '' || qttLevels.value === ''){
         alert("Impossível continuar, campo vazio");
     }
-    else if(qttQuestions < 3 || isNaN(qttQuestions) || qttLevels < 2 || isNaN(qttLevels)){
+    else if(qttQuestions.value < 3 || isNaN(qttQuestions.value) || qttLevels.value < 2 || isNaN(qttLevels.value)){
         alert("Quantidade de perguntas ou níveis inválida");
     } 
-    else if((tittleQuizz.length < 20 || tittleQuizz.length > 65) || !URLimagemPrincipal.includes("https:") ){
+    else if((titleQuizz.value.length < 20 || titleQuizz.value.length > 65) || !URLimagemPrincipal.value.includes("https:") ){
         alert("Título ou URL inválida");
     }
     else {
-        secondCreationSheet()
+        secondCreationSheet(titleQuizz, imageQuizz, qttQuestions, qttLevels)
     }
 }
 
-function secondCreationSheet (){
-    const containerScreen1 = document.getElementsByClassName('container-screen1');
-    const containerScreen2 = document.getElementsByClassName('container-screen2');
+function secondCreationSheet (titleQuizz, imageQuizz, qttQuestions, qttLevels){
+    const containerScreen1 = document.querySelector('.container-screen1');
+    const containerScreen2 = document.querySelector('.container-screen2');
     containerScreen1.classList.add('hidden');
     containerScreen2.innerHTML = `
     <h2 class="title-section"><strong>Crie suas perguntas</strong></h2>
     `
-    let i = 1;
     let j = 0;
-    for ( i; i <= qttQuestions.value; i++){
-    containerScreen2.innerHTML += `
-    <form>
-        <h3>Pergunta ${i}</h3>
-        <input class="text-ask" id="text-ask${i}" placeholder="Texto da pergunta"></input>
-        <input class="background-color-ask" id="background-color-ask${i}" placeholder="Cor de fundo da pergunta"></input>
-        <h3>Resposta correta</h3>
-        <input class="correct-answer" id="correct-answer${i} placeholder="Resposta correta"></input>
-        <input class="correct-URL-img-answer" id="correct-URL-img-answer${i} placeholder="URL da imagem"></input>
-        <h3>Respostas incorretas</h3>
-        <input class="incorrect-answer" id="incorrect-answer${j++} placeholder="Resposta incorreta 1"></input>
-        <input class="incorrect-URL-img-answer" id="incorrect-URL-img-answer${j} placeholder="URL da imagem 1"></input>
-        <input class="incorrect-answer" id="incorrect-answer${j++} placeholder="Resposta incorreta 2"></input>
-        <input class="incorrect-URL-img-answer" id="incorrect-URL-img-answer${j} placeholder="URL da imagem 2"></input>
-        <input class="incorrect-answer" id="incorrect-answer${j++} placeholder="Resposta incorreta 3"></input>
-        <input class="incorrect-URL-img-answer" id="incorrect-URL-img-answer${j} placeholder="URL da imagem 3"></input>
-    </form>
+    for ( let i = 1; i <= qttQuestions.value; i++){
+        containerScreen2.innerHTML += `
+        <form>
+            <h3>Pergunta ${i}</h3>
+            <input class="text-ask" id="text-ask${i}" placeholder="Texto da pergunta"></input>
+            <input class="background-color-ask" id="background-color-ask${i}" placeholder="Cor de fundo da pergunta"></input>
+            <h3>Resposta correta</h3>
+            <input class="correct-answer" id="correct-answer${i} placeholder="Resposta correta"></input>
+            <input class="correct-URL-img-answer" id="correct-URL-img-answer${i} placeholder="URL da imagem"></input>
+            <h3>Respostas incorretas</h3>
+            <input class="incorrect-answer" id="incorrect-answer${j++} placeholder="Resposta incorreta 1"></input>
+            <input class="incorrect-URL-img-answer" id="incorrect-URL-img-answer${j} placeholder="URL da imagem 1"></input>
+            <input class="incorrect-answer" id="incorrect-answer${j++} placeholder="Resposta incorreta 2"></input>
+            <input class="incorrect-URL-img-answer" id="incorrect-URL-img-answer${j} placeholder="URL da imagem 2"></input>
+            <input class="incorrect-answer" id="incorrect-answer${j++} placeholder="Resposta incorreta 3"></input>
+            <input class="incorrect-URL-img-answer" id="incorrect-URL-img-answer${j} placeholder="URL da imagem 3"></input>
+        </form>
     `};
     containerScreen2.innerHTML += `
-    <button onclick="validationSecondCreationSheet()">Prosseguir para criar perguntas</button>
+    <button onclick="validationSecondCreationSheet(titleQuizz, imageQuizz, qttQuestions, qttLevels)">Prosseguir para criar perguntas</button>
     `
 }
 
-function validationSecondCreationSheet(){
+function validationSecondCreationSheet(titleQuizz, imageQuizz, qttQuestions, qttLevels){
     let textAsk, backgroundColorAsk, correctAnswer, correctURLimgAnswer = [];
     let incorrectAnswer, incorrectURLimgAnswer = [];
     let k = 1;
@@ -174,58 +220,69 @@ function validationSecondCreationSheet(){
         }
     }
     for (let i = 1; i <= qttQuestions.value; i++){
-        backgroundColorAsk[i] = backgroundColorAsk[i].replace(/[^0-9a-f]/gi, '');
-        isValideHex = backgroundColorAsk[i].length === 6 || backgroundColorAsk.length === 3;
-        if (!isValideHex || !correctURLimgAnswer[i].includes("https:")){
+        backgroundColorAsk[i].value = backgroundColorAsk[i].value.replace(/[^0-9a-f]/gi, '');
+        isValideHex = backgroundColorAsk[i].value.length === 6 || backgroundColorAsk.value.length === 3;
+        if (!isValideHex || !correctURLimgAnswer[i].value.includes("https:")){
+            alert("Impossível continuar, url ou valor de cor hexadecimal errados");
+        }
+        else if (textAsk[i].value === '' || backgroundColorAsk[i].value === '' || correctAnswer[i].value === '' || correctURLimgAnswer[i].value === ''){
             alert("Impossível continuar, campo vazio");
         }
-        if (textAsk[i] === '' || backgroundColorAsk[i] === '' || correctAnswer[i] === '' || correctURLimgAnswer[i] === ''){
-            alert("Impossível continuar, campo vazio");
+        else if (textAsk[i].value.length < 20){
+            alert("Impossível continuar, pergunta com menos de 20 caracteres");
         }
-        if (textAsk[i].length < 20){
-            alert("Impossível continuar, campo vazio");
-        }
+        else thirdCreationSheet(titleQuizz, imageQuizz, qttQuestions, qttLevels)
     }
-    thirdCreationSheet()
 }
 
-function thirdCreationSheet (){
-    /* hidden container 2 */
+function thirdCreationSheet (titleQuizz, imageQuizz, qttQuestions, qttLevels){
+    const containerScreen2 = document.querySelector('.container-screen2');
+    const containerScreen3 = document.querySelector('.container-screen3');
+    containerScreen2.classList.add('hidden');
+    containerScreen3.innerHTML = `
+    <h2 class="title-section"><strong>Agora, decida os níveis</strong></h2>
+    `
+    for ( let i = 1; i <= qttLevels.value; i++){
+    containerScreen3.innerHTML +=`
+        <form>
+        <h3>Nível ${i}</h3>
+            <input class="title-level" id="title-level${i}" placeholder="Título do nível"></input>
+            <input class="min-rate-level" id="min-rate-level${i}" placeholder="% de acerto mínima"></input>
+            <input class="URL-img-level" id="URL-img-level${i} placeholder="URL da imagem do nível"></input>
+            <input class="description-level" id="description-level${i} placeholder="Descrição do nível"></input>
+        </form>
+    `}
+    containerScreen3.innerHTML += `
+    <button onclick="validationThirdCreationSheet(titleQuizz, imageQuizz, qttQuestions, qttLevels)">Finalizar Quizz</button>
+    `
+}
+
+function validationThirdCreationSheet (titleQuizz, imageQuizz, qttQuestions, qttLevels){
     /* ... */
-    validationThirdCreationSheet()
+    fourthCreationSheet(titleQuizz, imageQuizz, qttQuestions, qttLevels)
 }
 
-function validationThirdCreationSheet (){
-    /* ... */
-    fourthCreationSheet()
+function fourthCreationSheet(titleQuizz, imageQuizz, qttQuestions, qttLevels){
+    const containerScreen3 = document.querySelector('.container-screen3');
+    const containerScreen4 = document.querySelector('.container-screen4');
+    containerScreen3.classList.add('hidden');
+    containerScreen4.innerHTML = `
+    <h2 class="title-section"><strong>Seu quizz está pronto!</strong></h2>
+    <div class="your-created-quizz">
+        <img src="${imageQuizz.value}" alt="">
+        <h3>${titleQuizz.value}</h3>
+    </div>
+    <button onclick="acessCreatedQuizz()">Acessar Quizz</button>
+    <button onclick="renderHomePage()">Voltar pra home</button>
+    `
+    const promisse = axios.post("https://mock-api.driven.com.br/api/v4/buzzquizz/quizzes")
+    promisse.then(sendQuizz);
 }
-
-function fourthCreationSheet(){
-    /* hidden container 3 */
-    /* ... */
-    doneFouthCreationSheet()
-}
-
-function doneFouthCreationSheet(){
-    /* hidden container 4 */
-    /* chama verificação renderhomepage ou getquizzes? testar */
-
-}
-
 
 /* -----------------------------------------------errors----------------------------------------------- */
 
 function error1 (error){
     alert("Failed to load server");
-    console.log(error.response); /* check this!!!!!!!!!!!! */
+    console.log(error.response);
 }
-
-
-
-/* 
-const yourQuizzes = document.getElementById("your-quizzes");
-const state0 = yourQuizzes.querySelector("#state0");
-state0.classList.add("hidden"); hides state 0 and shows the first creation sheet */
-
-/* gagaga */
 
